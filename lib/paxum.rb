@@ -3,6 +3,10 @@ require 'net/https'
 require "paxum/exception"
 
 class Paxum
+  API_PATH = '/payment/api/paymentAPI.php'
+  API_HOST = 'www.paxum.com'
+  API_PORT = '443'
+
   SUCCESS_CODE = "00"
   RESPONSE_CODES = {
     "03" => "invalid_merchant",
@@ -39,12 +43,7 @@ class Paxum
   end
 
   def pay
-    http = Net::HTTP.new('www.paxum.com', 443)
-    http.use_ssl = true
-    path = '/payment/api/paymentAPI.php'
-    result = http.post(path, data_string, headers)
-
-    code = get_response_code(result.body)
+    code = get_response_code(api_call_result.body)
     if code == SUCCESS_CODE
       true
     else
@@ -54,22 +53,21 @@ class Paxum
 
   private
 
-  def prepare_data_hash
-    paxum_currency_code = @options[:currency]
-    paxum_id_to = @options[:to]
-    paxum_id_from = @options[:from]
-    sum = @options[:amount]
-    id = @options[:id]
-    domain = @options[:domain]
+  def api_call_result
+    http = Net::HTTP.new(API_HOST, API_PORT)
+    http.use_ssl = true
+    http.post(API_PATH, data_string, headers)
+  end
 
+  def prepare_data_hash
     {
       'method' => 'transferFunds',
-      'fromEmail' => paxum_id_from,
-      'toEmail' => paxum_id_to,
-      'amount' => sum,
-      'currency' => paxum_currency_code,
-      'note' => "#{id} #{domain}",
-      'key' => count_key(@api_secret, paxum_id_to, sum, paxum_currency_code, "#{id} #{domain}")
+      'fromEmail' => @options[:from],
+      'toEmail' => @options[:to],
+      'amount' => @options[:amount],
+      'currency' => @options[:currency],
+      'note' => "#{@options[:id]} #{@options[:domain]}",
+      'key' => count_key(@api_secret, @options[:to], @options[:amount], @options[:currency], "#{@options[:id]} #{@options[:domain]}")
     }
   end
 

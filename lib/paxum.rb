@@ -1,5 +1,6 @@
 require 'net/http'
 require 'net/https'
+require "paxum/exception"
 
 class Paxum
   SUCCESS_CODE = "00"
@@ -29,25 +30,29 @@ class Paxum
   }
 
   def self.transfer_funds(email, api_secret, options)
-    paxum_api = Paxum.new(email, api_secret, options)
+    paxum_api = self.new(email, api_secret, options)
     paxum_api.pay
   end
 
-  def initialize(email, api_secret)
+  def initialize(email, api_secret, options)
     @email, @api_secret, @options = email, api_secret, options
   end
-
-  private
 
   def pay
     http = Net::HTTP.new('www.paxum.com', 443)
     http.use_ssl = true
     path = '/payment/api/paymentAPI.php'
-    resp, result = http.post(path, data_string, headers)
+    result = http.post(path, data_string, headers)
 
-    code = PaxumApi.get_response_code(result)
-    code == SUCCESS_CODE
+    code = get_response_code(result.body)
+    if code == SUCCESS_CODE
+      true
+    else
+      raise PaxumException, RESPONSE_CODES[code]
+    end
   end
+
+  private
 
   def prepare_data_hash
     paxum_currency_code = @options[:currency]
@@ -64,7 +69,7 @@ class Paxum
       'amount' => sum,
       'currency' => paxum_currency_code,
       'note' => "#{id} #{domain}",
-      'key' => PaxumApi.count_key(@api_secret, paxum_id_to, sum, paxum_currency_code, "#{id} #{domain}")
+      'key' => count_key(@api_secret, paxum_id_to, sum, paxum_currency_code, "#{id} #{domain}")
     }
   end
 

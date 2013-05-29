@@ -1,0 +1,1 @@
+class PaxumException < Exception; end

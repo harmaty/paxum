@@ -3,6 +3,7 @@
 [![Code Climate](https://codeclimate.com/github/Mehonoshin/paxum.png)](https://codeclimate.com/github/Mehonoshin/paxum)
 
 Ruby wrapper for Paxum API
+
 A list of availible api methods: https://www.paxum.com/payment_docs/page.php?name=apiIntroduction
 
 ## Installation
@@ -47,4 +48,4 @@ Feel free to make PRs.
 
 ## License
 
-Paxum is released under the MIT License
+Released by independent developer, under the MIT License.

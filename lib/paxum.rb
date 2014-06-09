@@ -40,7 +40,7 @@ class Paxum
 
   attr_accessor :options
 
-  def initialize(email, api_secret, options)
+  def initialize(email, api_secret, options = {})
     @email, @api_secret, @options = email, api_secret, options
   end
 

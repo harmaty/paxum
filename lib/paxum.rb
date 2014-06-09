@@ -38,17 +38,35 @@ class Paxum
     paxum_api.pay
   end
 
+  attr_accessor :options
+
   def initialize(email, api_secret, options)
     @email, @api_secret, @options = email, api_secret, options
   end
 
   def pay
+    options[:method] = 'transferFunds'
     code = get_response_code(api_call_result.body)
     if code == SUCCESS_CODE
       true
     else
       raise PaxumException, RESPONSE_CODES[code]
     end
+  end
+
+  def balance(currency = 'USD')
+    options[:method] = 'balanceInquiry'
+    result = api_call_result.body
+
+    code = get_response_code result
+    raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
+
+    response_hash = Hash.from_xml result
+    value = 0
+    response_hash["Response"]["Accounts"]["Account"].each do |account|
+      value = account["Balance"] if account["Currency"] == currency
+    end
+    value.to_f
   end
 
   private
@@ -61,8 +79,8 @@ class Paxum
 
   def prepare_data_hash
     {
-      'method' => 'transferFunds',
-      'fromEmail' => @options[:from],
+      'method' => @options[:method] || 'transferFunds',
+      'fromEmail' => @options[:from] || @email,
       'toEmail' => @options[:to],
       'amount' => @options[:amount],
       'currency' => @options[:currency],

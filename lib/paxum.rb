@@ -45,8 +45,7 @@ class Paxum
   end
 
   def pay
-    options[:method] = 'transferFunds'
-    code = get_response_code(api_call_result.body)
+    code = get_response_code(api_call_result('transferFunds').body)
     if code == SUCCESS_CODE
       true
     else
@@ -55,8 +54,7 @@ class Paxum
   end
 
   def balance(currency = 'usd')
-    options[:method] = 'balanceInquiry'
-    result = api_call_result.body
+    result = api_call_result('balanceInquiry').body
 
     code = get_response_code result
     raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
@@ -71,27 +69,23 @@ class Paxum
 
   private
 
-  def api_call_result
+  def api_call_result(method)
     http = Net::HTTP.new(API_HOST, API_PORT)
     http.use_ssl = true
-    http.post(API_PATH, data_string, headers)
+    http.post(API_PATH, data_string(method), headers)
   end
 
-  def prepare_data_hash
-    {
-      'method' => @options[:method] || 'transferFunds',
-      'fromEmail' => @options[:from] || @email,
-      'toEmail' => @options[:to],
-      'amount' => @options[:amount],
-      'currency' => @options[:currency],
-      'note' => "#{@options[:id]} #{@options[:domain]}",
-      'key' => count_key(@api_secret, @options[:to], @options[:amount], @options[:currency], "#{@options[:id]} #{@options[:domain]}")
+  def data_string(method)
+    data_hash = {
+        method: method,
+        fromEmail: @email,
+        toEmail: options[:to],
+        amount: options[:amount],
+        currency: options[:currency],
+        note: options[:note],
+        key: count_key(*options.values)
     }
-  end
-
-  def data_string
-    data_hash = prepare_data_hash
-    "method=#{data_hash['method']}&note=#{data_hash['note']}&fromEmail=#{data_hash['fromEmail']}&toEmail=#{data_hash['toEmail']}&amount=#{data_hash['amount']}&currency=#{data_hash['currency']}&key=#{data_hash['key']}&sandbox=#{data_hash['sandbox']}&return=#{data_hash['return']}"
+    data_hash.map{|key, value| "#{key}=#{value}"}.jpin('&')
   end
 
   def headers
@@ -99,7 +93,7 @@ class Paxum
   end
 
   def count_key(*options)
-    str = ""
+    str = @api_secret
     options.each { |arg| str << arg.to_s }
     Digest::MD5.hexdigest(str)
   end

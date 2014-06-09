@@ -54,7 +54,7 @@ class Paxum
     end
   end
 
-  def balance(currency = 'USD')
+  def balance(currency = 'usd')
     options[:method] = 'balanceInquiry'
     result = api_call_result.body
 

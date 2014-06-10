@@ -51,18 +51,18 @@ class Paxum
     true
   end
 
-  def balance(currency = 'usd')
+  # Balance Inquiry
+  # https://www.paxum.com/payment_docs/page.php?name=apiBalanceInquiry
+
+  def balance(account_id)
+    options[:account_id] = account_id
     result = api_call_result('balanceInquiry').body
 
     code = get_response_code result
     raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
 
     response_hash = Hash.from_xml result
-    value = 0
-    response_hash["Response"]["Accounts"]["Account"].each do |account|
-      value = account["Balance"] if account["Currency"] == currency
-    end
-    value.to_f
+    response_hash["Response"]["Accounts"]["Account"]["Balance"].to_f
   end
 
   private
@@ -81,9 +81,10 @@ class Paxum
         amount: options[:amount],
         currency: options[:currency],
         note: options[:note],
+        accountId: options[:account_id],
         key: count_key(*options.values)
     }
-    data_hash.map{|key, value| "#{key}=#{value}"}.join('&')
+    data_hash.reject{|key, value| value.nil? }.map{|key, value| "#{key}=#{value}"}.join('&')
   end
 
   def headers

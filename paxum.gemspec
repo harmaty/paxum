@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'paxum'
-  s.version     = '0.0.3'
-  s.date        = '2014-06-09'
+  s.version     = '0.0.4'
+  s.date        = '2014-06-10'
   s.summary     = "Ruby wrapper for Paxum API"
   s.description = "Allows to transfer funds between paxum users"
   s.authors     = ["Stanislav Mekhonoshin"]

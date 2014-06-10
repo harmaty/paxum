@@ -35,7 +35,7 @@ Anywhere in your application use gem in following way:
     to: "recipient@example.com",
     from: "sender@example.com",
     amount: 100,
-    note: "1 example.com", // allowes to insert additional text at paxum transaction description field
+    note: "1 example.com" // allowes to insert additional text at paxum transaction description field
   }
 
   Paxum.transfer_funds("sender@example.com", "api_secret_token_from_your_paxum_profile_page", options)
@@ -43,8 +43,8 @@ Anywhere in your application use gem in following way:
 
 ### Balance Inquiry
 ```ruby
-  paxum_api = Paxum.new "user@example.com", "secret_token")
-  paxum_api.balance(1111)
+  paxum_api = Paxum.new("user@example.com", "secret_token")
+  paxum_api.balance(1111) # balance for account ID 1111
 ```
 
 

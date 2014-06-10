@@ -43,7 +43,14 @@ class Paxum
   end
 
   def pay(options)
-    result = api_call_result('transferFunds', options).body
+    pay_options = {
+        to: options[:to],
+        amount: options[:amount],
+        currency: options[:currency],
+        note: options[:note]
+    }
+
+    result = api_call_result('transferFunds', pay_options).body
     check_response result
     true
   end
@@ -88,8 +95,7 @@ class Paxum
   end
 
   def count_key(*options)
-    str = @api_secret
-    options.each { |arg| str << arg.to_s }
+    str = [@api_secret, *options].join
     Digest::MD5.hexdigest(str)
   end
 

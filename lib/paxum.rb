@@ -46,11 +46,9 @@ class Paxum
 
   def pay
     code = get_response_code(api_call_result('transferFunds').body)
-    if code == SUCCESS_CODE
-      true
-    else
-      raise PaxumException, RESPONSE_CODES[code]
-    end
+    raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
+
+    true
   end
 
   def balance(currency = 'usd')
@@ -85,7 +83,7 @@ class Paxum
         note: options[:note],
         key: count_key(*options.values)
     }
-    data_hash.map{|key, value| "#{key}=#{value}"}.jpin('&')
+    data_hash.map{|key, value| "#{key}=#{value}"}.join('&')
   end
 
   def headers

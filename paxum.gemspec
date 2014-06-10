@@ -8,4 +8,5 @@ Gem::Specification.new do |s|
   s.email       = 'ejabberd@gmail.com'
   s.files       = ["lib/paxum/exception.rb"]
   s.homepage    = 'https://github.com/Mehonoshin/paxum'
+  s.add_dependency "activesupport"
 end

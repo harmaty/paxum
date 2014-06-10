@@ -34,20 +34,17 @@ class Paxum
   }
 
   def self.transfer_funds(email, api_secret, options)
-    paxum_api = self.new(email, api_secret, options)
-    paxum_api.pay
+    paxum_api = self.new(email, api_secret)
+    paxum_api.pay(options)
   end
 
-  attr_accessor :options
-
-  def initialize(email, api_secret, options = {})
-    @email, @api_secret, @options = email, api_secret, options
+  def initialize(email, api_secret)
+    @email, @api_secret = email, api_secret
   end
 
-  def pay
-    code = get_response_code(api_call_result('transferFunds').body)
-    raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
-
+  def pay(options)
+    result = api_call_result('transferFunds', options).body
+    check_response result
     true
   end
 
@@ -55,11 +52,10 @@ class Paxum
   # https://www.paxum.com/payment_docs/page.php?name=apiBalanceInquiry
 
   def balance(account_id)
-    options[:account_id] = account_id
-    result = api_call_result('balanceInquiry').body
+    options = {account_id: account_id}
+    result = api_call_result('balanceInquiry', options).body
 
-    code = get_response_code result
-    raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
+    check_response result
 
     response_hash = Hash.from_xml result
     response_hash["Response"]["Accounts"]["Account"]["Balance"].to_f
@@ -67,13 +63,13 @@ class Paxum
 
   private
 
-  def api_call_result(method)
+  def api_call_result(method, options)
     http = Net::HTTP.new(API_HOST, API_PORT)
     http.use_ssl = true
-    http.post(API_PATH, data_string(method), headers)
+    http.post(API_PATH, data_string(method, options), headers)
   end
 
-  def data_string(method)
+  def data_string(method, options = {})
     data_hash = {
         method: method,
         fromEmail: @email,
@@ -100,6 +96,11 @@ class Paxum
   def get_response_code(xml)
     hash = Hash.from_xml(xml)
     hash["Response"]["ResponseCode"]
+  end
+
+  def check_response(result)
+    code = get_response_code result
+    raise PaxumException, RESPONSE_CODES[code] unless code == SUCCESS_CODE
   end
 
 end

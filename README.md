@@ -35,12 +35,18 @@ Anywhere in your application use gem in following way:
     to: "recipient@example.com",
     from: "sender@example.com",
     amount: 100,
-    id: 1, // your internal id of payment
-    domain: "example.com", // allowes to insert additional text at paxum transaction description field
+    note: "1 example.com", // allowes to insert additional text at paxum transaction description field
   }
 
   Paxum.transfer_funds("sender@example.com", "api_secret_token_from_your_paxum_profile_page", options)
 ```
+
+### Balance Inquiry
+```ruby
+  paxum_api = Paxum.new "user@example.com", "secret_token")
+  paxum_api.balance(1111)
+```
+
 
 ## Contributing
 

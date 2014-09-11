@@ -68,6 +68,20 @@ class Paxum
     response_hash["Response"]["Accounts"]["Account"]["Balance"].to_f
   end
 
+  def transaction_history(options)
+    params = {
+        account_id: options[:account_id],
+        from_date: options[:from_date],
+        to_date: options[:to_date],
+        page_size: options[:page_size],
+        page_number: options[:page_number]
+    }
+
+    result = api_call_result('transactionHistory', params).body
+    check_response result
+    result
+  end
+
   private
 
   def api_call_result(method, options)
@@ -80,14 +94,12 @@ class Paxum
   def data_string(method, options = {})
     data_hash = {
         method: method,
-        fromEmail: @email,
-        toEmail: options[:to],
-        amount: options[:amount],
-        currency: options[:currency],
-        note: options[:note],
-        accountId: options[:account_id],
-        key: count_key(*options.values)
+        fromEmail: @email
     }
+    options.each do |k, v|
+      data_hash[k.to_s.camelize(:lower).to_sym] = v
+    end
+    data_hash[:key] = count_key(*options.values)
     data_hash.reject{|key, value| value.nil? }.map{|key, value| "#{key}=#{value}"}.join('&')
   end
 

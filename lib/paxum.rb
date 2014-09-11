@@ -71,8 +71,8 @@ class Paxum
   def transaction_history(options)
     params = {
         account_id: options[:account_id],
-        from_date: options[:from_date],
-        to_date: options[:to_date],
+        from_date: options[:from_date].strftime('%Y-%m-%d'),
+        to_date: options[:to_date].strftime('%Y-%m-%d'),
         page_size: options[:page_size],
         page_number: options[:page_number]
     }

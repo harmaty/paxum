@@ -47,6 +47,12 @@ Anywhere in your application use gem in following way:
   paxum_api.balance(1111) # balance for account ID 1111
 ```
 
+### Transaction History
+```ruby
+  paxum_api = Paxum.new("user@example.com", "secret_token")
+  paxum_api.transaction_history(account_id: 1111, from_date: '2014-09-01', to_date: '2014-09-25') # transaction_history for account ID 1111
+```
+
 
 ## Contributing
 

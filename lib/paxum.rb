@@ -44,15 +44,13 @@ class Paxum
 
   def pay(options)
     pay_options = {
-        to: options[:to],
+        to_email: options[:to],
         amount: options[:amount],
         currency: options[:currency],
         note: options[:note]
     }
 
-    result = api_call_result('transferFunds', pay_options).body
-    check_response result
-    true
+    api_call('transferFunds', pay_options)
   end
 
   # Balance Inquiry
@@ -60,36 +58,44 @@ class Paxum
 
   def balance(account_id)
     options = {account_id: account_id}
-    result = api_call_result('balanceInquiry', options).body
+    response = api_call('balanceInquiry', options)
 
-    check_response result
-
-    response_hash = Hash.from_xml result
-    response_hash["Response"]["Accounts"]["Account"]["Balance"].to_f
+    response["Response"]["Accounts"]["Account"]["Balance"].to_f
   end
 
   def transaction_history(options)
+    from_date = if options[:from_date].respond_to? :strftime
+                  options[:from_date].strftime('%Y-%m-%d')
+                else
+                  options[:from_date]
+                end
+    to_date = if options[:to_date].respond_to? :strftime
+                  options[:to_date].strftime('%Y-%m-%d')
+                else
+                  options[:to_date]
+                end
     params = {
         account_id: options[:account_id],
-        from_date: options[:from_date].strftime('%Y-%m-%d'),
-        to_date: options[:to_date].strftime('%Y-%m-%d'),
+        from_date: from_date,
+        to_date: to_date,
         page_size: options[:page_size],
         page_number: options[:page_number]
     }
 
-    result = api_call_result('transactionHistory', params).body
-    check_response result
-    result
+    response = api_call('transactionHistory', params)
+    response["Response"]["Transactions"]["Transaction"]
   end
 
-  private
-
-  def api_call_result(method, options)
+  def api_call(method, options)
     http = Net::HTTP.new(API_HOST, API_PORT)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    http.post(API_PATH, data_string(method, options), headers)
+    response = http.post(API_PATH, data_string(method, options), headers)
+    check_response response
+    Hash.from_xml response.body
   end
+
+  private
 
   def data_string(method, options = {})
     data_hash = {

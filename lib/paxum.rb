@@ -81,7 +81,7 @@ class Paxum
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     response = http.post(API_PATH, data_string(method, options), headers)
-    check_response response
+    check_response response.body
     Hash.from_xml response.body
   end
 

@@ -64,20 +64,10 @@ class Paxum
   end
 
   def transaction_history(options)
-    from_date = if options[:from_date].respond_to? :strftime
-                  options[:from_date].strftime('%Y-%m-%d')
-                else
-                  options[:from_date]
-                end
-    to_date = if options[:to_date].respond_to? :strftime
-                  options[:to_date].strftime('%Y-%m-%d')
-                else
-                  options[:to_date]
-                end
     params = {
         account_id: options[:account_id],
-        from_date: from_date,
-        to_date: to_date,
+        from_date: format_date(options[:from_date]),
+        to_date: format_date(options[:to_date]),
         page_size: options[:page_size],
         page_number: options[:page_number]
     }
@@ -121,6 +111,14 @@ class Paxum
   def get_response_code(xml)
     hash = Hash.from_xml(xml)
     hash["Response"]["ResponseCode"]
+  end
+
+  def format_date(date)
+    if date.respond_to? :strftime
+      date.strftime('%Y-%m-%d')
+    else
+      date.to_s
+    end
   end
 
   def check_response(result)

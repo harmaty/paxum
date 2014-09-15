@@ -74,7 +74,11 @@ class Paxum
 
     response = api_call('transactionHistory', params)
     transactions = response["Response"]["Transactions"]["Transaction"]
-    [transactions] if transactions.is_a? Hash
+    if transactions.is_a? Hash
+      [transactions]
+    else
+      transactions
+    end
   end
 
   def api_call(method, options)

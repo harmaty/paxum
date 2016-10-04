@@ -9,28 +9,28 @@ class Paxum
 
   SUCCESS_CODE = "00"
   RESPONSE_CODES = {
-    "03" => "invalid_merchant",
-    "30" => "format_error",
-    "51" => "not_enough_funds",
-    "52" => "single_transaction_limit_amount_exceeded",
-    "53" => "daily_transaction_limit_amount_exceeded",
-    "54" => "monthly_transaction_limit_amount_exceeded",
-    "55" => "incorrect_pin",
-    "56" => "daily_transaction_limit_number_exceeded",
-    "57" => "monthly_transaction_limit_number_exceeded",
-    "58" => "transaction_not_permitted",
-    "66" => "api_method_disabled",
-    "IP" => "invalid_payee",
-    "IA" => "invalid_account_id",
-    "IT" => "invalid_transaction_id",
-    "IM" => "invalid_method_name",
-    "IS" => "invalid_subscription_id",
-    "P5" => "currency_conversion_error",
-    "83" => "cancel_subscription_failed",
-    "88" => "file_upload_failed",
-    "89" => "request_money_failed",
-    "99" => "not_implemented_yet",
-    "UA" => "unverified_account"
+      "03" => "invalid_merchant",
+      "30" => "format_error",
+      "51" => "not_enough_funds",
+      "52" => "single_transaction_limit_amount_exceeded",
+      "53" => "daily_transaction_limit_amount_exceeded",
+      "54" => "monthly_transaction_limit_amount_exceeded",
+      "55" => "incorrect_pin",
+      "56" => "daily_transaction_limit_number_exceeded",
+      "57" => "monthly_transaction_limit_number_exceeded",
+      "58" => "transaction_not_permitted",
+      "66" => "api_method_disabled",
+      "IP" => "invalid_payee",
+      "IA" => "invalid_account_id",
+      "IT" => "invalid_transaction_id",
+      "IM" => "invalid_method_name",
+      "IS" => "invalid_subscription_id",
+      "P5" => "currency_conversion_error",
+      "83" => "cancel_subscription_failed",
+      "88" => "file_upload_failed",
+      "89" => "request_money_failed",
+      "99" => "not_implemented_yet",
+      "UA" => "unverified_account"
   }
 
   def self.transfer_funds(email, api_secret, options)
@@ -38,8 +38,14 @@ class Paxum
     paxum_api.pay(options)
   end
 
-  def initialize(email, api_secret)
+  def initialize(email, api_secret, api_url = nil)
     @email, @api_secret = email, api_secret
+    if api_url
+      uri = URI(api_url)
+      @api_host, @api_path, @api_port = uri.host, uri.path, uri.port
+    else
+      @api_host, @api_path, @api_port = API_HOST, API_PATH, API_PORT
+    end
   end
 
   def pay(options)
@@ -82,10 +88,10 @@ class Paxum
   end
 
   def api_call(method, options)
-    http = Net::HTTP.new(API_HOST, API_PORT)
+    http = Net::HTTP.new(@api_host, @api_port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    response = http.post(API_PATH, data_string(method, options), headers)
+    response = http.post(@api_path, data_string(method, options), headers)
     check_response response.body
     Hash.from_xml response.body
   end
@@ -132,4 +138,3 @@ class Paxum
   end
 
 end
-

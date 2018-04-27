@@ -89,8 +89,11 @@ class Paxum
 
   def api_call(method, options)
     http = Net::HTTP.new(@api_host, @api_port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    if @api_port.to_i == 443
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    
     response = http.post(@api_path, data_string(method, options), headers)
     check_response response.body
     Hash.from_xml response.body
